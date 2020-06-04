@@ -1,0 +1,13 @@
+server_addr: colab.tunnel:4443
+trust_host_root_certs: false
+tunnels:
+  ssh-app:
+    remote_port: 10022
+    proto:
+      tcp: 22
+  tensorboard-app:
+    remote_port: 10006
+    proto: http
+      http: 6006
+    inspect: false
+    bind_tls: true

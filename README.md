@@ -59,8 +59,18 @@ drive.I
 
 Để thực hiện project này thì sẽ cần:
 - Một server với IP tĩnh. Để demo mình sẽ sử dụng một máy ảo trên google cloud(Các bạn ra 
-ngân hàng đăng ký một thẻ debit, dùng thẻ này để đăng ký sẽ được $300 free).
+ngân hàng đăng ký một thẻ debit, dùng thẻ này để đăng ký sẽ được $300 free trong vòng một năm).
 - Kỹ năng sử dụng linux terminal cơ bản.
 - Máy tính để code. Laptop mình sử dụng có tuổi đời 7 năm, ram 4Gb.
+
+
+## Setup server
+### Tạo máy ảo trên google cloud
+Mình tạo ra một máy ảo *g1-small 1vCPU, 1.7 GB memory* ở Hongkong với giá khoảng  ~598 VNĐ/H
+
+![](images/vminstance.png)
+
+Cấu hình để thêm ssh public key vào và mở các port  7000, 8000, 8001, 4443, 10000 đến 10050 để sử dụng. Chi tiết cho bạn 
+nào chưa làm được mình sẽ viết riêng sau.
 
 

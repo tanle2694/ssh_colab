@@ -151,3 +151,24 @@ os.environ['TAG'] = "v1.0"
 - SSH_KEY: ssh public-key của máy local
 - APP_RUN: ở đây mình chạy 2 app đã đăng ký là *ssh-app* và *tensorboard-app*
 - TAG: tag của code trên github. Phần này các bạn không cần sửa đổi
+
+**Bước 3:** Run tất cả các cell
+ 
+![](images/run_all.png)
+
+Khi run xong thì tại cell cuối cùng ta sẽ thấy câu lệnh ssh hiện ra.
+![](images/ssh.png)
+
+Copy câu lệnh trên vào terminal chúng ta sẽ truy cập vào được instance của Colab.
+
+Mình đang sử dụng Colab Pro. Ta hãy thử xem Colab Pro có gì:
+
+- Check GPU với lệnh *nvidia-smi*, ta có GPU Tesla P100 16Gb VRAM
+![](images/nvidia_smi.png)
+
+- Check CPU với lệnh *lscpu*, ta có 2 core CPU với xung nhịp 2.30GHz
+![](images/lscpu.png)
+- Check RAM với lệnh *free -m*, ta có tổng cộng 13Gb Ram và còn có thể sử dụng 12Gb nữa
+![](images/check_ram.png)
+
+

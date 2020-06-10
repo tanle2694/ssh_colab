@@ -1,3 +1,4 @@
+set -e
 IP_SERVER="$1"
 SSH_KEY="$2"
 APP_RUN="$3"

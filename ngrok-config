@@ -7,7 +7,5 @@ tunnels:
       tcp: 22
   tensorboard-app:
     remote_port: 10006
-    proto: http
-      http: 6006
-    inspect: false
-    bind_tls: true
+    proto:
+      tcp: 6006

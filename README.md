@@ -1,19 +1,21 @@
 # Setup ngrok server và sử dụng colab như một remote server
 
 ## Table of Contents
-* [About the Project](#about-the-project)
-* [Getting Started]()
-    * [Prerequisites]()
-* [Setup server]()
-    * [Create an vm-instace on Google cloud engine]()
-    * [Install ngrok docker on the vm-instance]()
-* [Setup on Colab notebook]()
-* [Results]()
-* [Contact]()
-* [Acknowledgements]()
+* [About the Project](#1-about-the-project)
+* [Getting Started](#2-getting-started)
+    * [Prerequisites](#21-prerequisites)
+* [The first option:Use service of ngrok](#3-the-first-option-use-service-of-ngrok)    
+* [The second option: Build own ngrok server](#4-the-second-option-build-own-ngrok-server)
+    * [Setup server](41-setup-server)
+    * [Setup on Colab notebook](42-setup-on-colab-notebook)
+* [Results](#5-results)
+    * [Check hardware Colab](#51-check-hardware-colab)
+    * [Training sample](#52-training-sample)
+* [Tips & Tricks]()
+    * [Code, auto upload, run, and debug source code with Pycharm Professional]()
+* [Documents]()
 
-
-## About the Project
+## 1. About the Project
 
 Trong qúa trình làm việc sử dụng Google colab, mình gặp một vấn đề rất khó chịu là Colab sử dụng Jupyter Notebook để làm 
 việc. Một số vấn đề có thể kể đến là:
@@ -34,13 +36,13 @@ Mỗi lần muốn chạy một câu lệnh mới là xóa cell hiện tại đi
 Trong project này mình sẽ chia sẻ một cách làm việc hiệu quả với Google colab cho các bạn mới sử dụng colab. Một số chức năng được 
 cung cấp:
 - ssh vào colab và thao tác trên terminal với độ trễ thấp.
-- Code và debug với Pycharm ở local và tự động đồng bộ code lên colab server.
 - Tự động download các kết quả(checkpoint, log,...) về local thay vì phải lưu vào 
 drive.
 - Theo dõi Tensorboard từ local browser, hoặc bất kỳ thiết bị nào truy cập được internet.
+- Code và debug với Pycharm ở local và tự động đồng bộ code lên colab server.
 
-## Getting started
-### Prerequisites
+## 2. Getting started
+### 2.1 Prerequisites
 
 Để thực hiện project này thì sẽ cần:
 - Một server với IP tĩnh. Để demo mình sẽ sử dụng một máy ảo trên google cloud(Các bạn ra 
@@ -48,9 +50,43 @@ ngân hàng đăng ký một thẻ debit, dùng thẻ này để đăng ký sẽ
 - Sử dụng linux terminal cơ bản.
 - Máy tính để code. Laptop mình sử dụng có tuổi đời 7 năm, ram 4Gb.
 
+## 3. The first option: Use service of ngrok
 
-## Setup server
-### Create an instance on  google cloud
+Cách này dễ làm nhưng độ trễ khi sử dụng các câu lệnh trên terminal lớn và bạn chỉ có thể mở ra một cổng để truy cập. 
+Nên mình ít khi  sử dụng cách này. 
+
+Bước 1: Truy cập vào trang https://ngrok.com , tạo acccount. Sau đó bạn sẽ có được một đoạn mã authtoken.
+
+Bước 2: Tạo ra một file Colab notebook có nội dung giống của mình như [link](https://colab.research.google.com/drive/1s9aQsgg3IiWZom67Gdoue6flXeODpHz9?usp=sharing)
+
+Bước 3: Config các tham số ở cell thứ 2 
+```
+import os
+os.environ['authtoken'] = "1aDEELv5Yb24tBm509rGVDX7sDk_2oHnRo1bfpgiKSrRjnkcB"
+os.environ['SSH_KEY'] = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIykhpbjm/Yj3wZ55aMVyOy9DzKHdXh8ihs2SeQFzGKKsDcmCDyYb72g9nlA6gZVKFf00tD6TcMofoMu2O19IyhzM9/Ttnk32UXyVcwG83UJrU/lSh4PdFyminyNIJUQ4LAtpjOoObaLYYrYk1cPrq3qHV9prhKgZlmbsiMa/hDY4LFG6vgn6SdAWqlPRH8yvIVp6YdAH6LPR5z5JIL8pbQn71LeuJbJMsR50TYM3HvaTDZMim1Bcw0INGxp/hNJ523CHOI0iCLwqSFKd7HgxOq/tnf2rCyqcCKJH3yHkOATvgxoqAaFVhPp2WjWKX+BlV9Oq8Xzb3HzirEsE/HbT/ tanlm@pc11-All-Series-Invalid-entry-length-16-Fixed-up-to-11"
+```
+- authtoken: Token mà trang https://ngrok.com đưa cho bạn.
+- SSH_KEY: ssh public key của máy local. 
+
+Bước 4: Run toàn bộ file colab notebook. Ở cell cuối cùng ta sẽ thấy một câu lệnh ssh hiện ra
+
+![](images/ngrok_service.png)
+
+Copy câu lệnh này vào terminal thì ta có thể truy cập vào colab instance bằng SSH.
+
+![](images/ssh_ngrok_service.png)
+
+ 
+## 4. The second option: Build own ngrok server
+
+Cách này sẽ hơi khó hơn chút là tự cài đặt ngrok server của riêng mình. 
+
+Bù lại ta sẽ có thể sử dụng terminal một cách gần như real-time và mở nhiều cổng hơn để sử dụng.
+
+Quá trình sẽ được chia thành 2 giai đoạn là setup server và setup client
+
+### 4.1 Setup server
+#### 4.1.1 Create an instance on  google cloud
 Mình tạo ra một máy ảo *g1-small 1vCPU, 1.7 GB memory* ở khu vực Hongkong với giá khoảng  ~598 VNĐ/H. Quá rẻ cho một cuộc tình.
 
 Hệ điều hành mình sử dụng ở đây là Ubuntu-16.04
@@ -59,13 +95,20 @@ Hệ điều hành mình sử dụng ở đây là Ubuntu-16.04
  
 Tiếp đến là cấu hình mở port và cài đặt docker.
 * Cấu hình server để mở các port: 7000, 8000, 8001, 4443, 10000-10050 để sử dụng. Gồm 2 bước: 
-   * Mở port với google cloud
+   * Mở port với google cloud. Các bạn google. [Đây](https://www.youtube.com/watch?v=JmjqPpQdtW8) là một ví dụ với mở cổng 8080 trên google cloud 
    * Mở port trên Ubuntu
-* Cài đặt docker. Đây là [hướng dẫn cài đặt](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04) trên Ubuntu-16.06
+     ```
+     sudo ufw allow 7000
+     sudo ufw allow 8000
+     sudo ufw allow 8001
+     sudo ufw allow 4443
+     sudo ufw allow 10000:10050  
+     ```
+* Cài đặt docker. Đây là [hướng dẫn cài đặt](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04) trên Ubuntu-16.04
 
-### Build and run ngrok server:
+#### 4.1.2 Build and run ngrok server:
 
-Đầu tiên là clone code về:
+Đầu tiên là clone code và các file cài đặt về:
 ```
 git clone https://github.com/tanle2694/ssh_colab
 ```
@@ -86,7 +129,7 @@ dưới
 
 ![](images/docker_ps.png)
 
-### Expose ports of Colab:
+### 4.2 Setup on Colab notebook:
 
 **Bước 1:** Tạo một file Colab notebook giống như trong file colab của mình trong [link](https://colab.research.google.com/drive/1Fmm5Ry_mjw69pUi_2y3wWJqzmaOROdvw?usp=sharing) 
 
@@ -165,9 +208,9 @@ Khi run xong thì tại cell cuối cùng ta sẽ thấy câu lệnh ssh hiện 
 
 Copy câu lệnh trên vào terminal chúng ta sẽ truy cập vào được instance của Colab.
 
-## Results
+## 5. Results
 
-### Check hardware Colab:
+### 5.1 Check hardware Colab:
 Mình đang sử dụng Colab Pro. Ta hãy thử xem Colab Pro có gì:
 
 - Check GPU với lệnh *nvidia-smi*, ta có GPU Tesla P100 16Gb VRAM
@@ -179,7 +222,7 @@ Mình đang sử dụng Colab Pro. Ta hãy thử xem Colab Pro có gì:
 ![](images/check_ram.png)
 
 
-### Training sample:
+### 5.2 Training sample:
 Trước khi training cần phải setup code và data. 
 **Bước 1:** Clone code từ github xuống. Hoặc thay vì clone thì các bạn có thể upload trực tiếp từ local lên cũng được
 
@@ -234,3 +277,10 @@ Sau khi setup các tham số xong thì chỉ cần chạy. Các checkpoint sẽ 
 chmod +x rsynfile.sh
 ./rsynfile.sh
 ```
+
+## 5. Tips & Tricks:
+
+### 5.1 Code, auto upload run, auto upload 
+**UPDATING**
+
+# 6. Documents:

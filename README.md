@@ -157,10 +157,14 @@ os.environ['TAG'] = "v1.0"
 ![](images/run_all.png)
 
 Khi run xong thì tại cell cuối cùng ta sẽ thấy câu lệnh ssh hiện ra.
+
 ![](images/ssh.png)
 
 Copy câu lệnh trên vào terminal chúng ta sẽ truy cập vào được instance của Colab.
 
+## Results
+
+### Check hardware Colab:
 Mình đang sử dụng Colab Pro. Ta hãy thử xem Colab Pro có gì:
 
 - Check GPU với lệnh *nvidia-smi*, ta có GPU Tesla P100 16Gb VRAM
@@ -172,3 +176,34 @@ Mình đang sử dụng Colab Pro. Ta hãy thử xem Colab Pro có gì:
 ![](images/check_ram.png)
 
 
+### Training sample:
+Trước khi training cần phải setup code và data. 
+**Bước 1:** Clone code từ github xuống. Hoặc thay vì clone thì các bạn có thể upload trực tiếp từ local lên cũng được
+
+`git clone https://github.com/tanle2694/mri_brain_segmentation`
+
+![](images/clone_code.png)
+
+**Bước 2:** Upload data từ local lên. Sử dụng lệnh scp trỏ đến cổng 10004, để upload file *data_mri.zip* lên thư mục 
+*/root/data* trên Colab
+
+`scp -P 10004 data_mri.zip  root@35.186.148.223:/root/data`
+
+![](images/scp.png)
+
+**Bước 3:** Training và theo dõi kết quả.
+
+Mình thường sử dụng [tmux](https://kipalog.com/posts/Nghich-tmux) để làm việc với các remote server.
+Trong hình bên dưới là mình đang training ở panel bên trái và run Tensorboard ở pannel bên phải. 
+  
+![](images/training.png)
+
+Ở local browser ta có thể theo dõi Tensorboard tại địa chỉ `http://35.186.148.224:10006`. 
+
+Địa chỉ này bao gồm địa chỉ của server cài đặt ngrok-server (35.186.148.224) và port 10006 là port đã setup cho 
+Tensorboard-app
+
+![](images/tensorboard.png)
+
+
+ 

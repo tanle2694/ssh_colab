@@ -50,16 +50,18 @@ ngân hàng đăng ký một thẻ debit, dùng thẻ này để đăng ký sẽ
 
 
 ## Setup server
-### Tạo máy ảo trên google cloud
+### Create an instance on  google cloud
 Mình tạo ra một máy ảo *g1-small 1vCPU, 1.7 GB memory* ở khu vực Hongkong với giá khoảng  ~598 VNĐ/H. Quá rẻ cho một cuộc tình.
 
 Hệ điều hành mình sử dụng ở đây là Ubuntu-16.04
 
 ![](images/vminstance.png)
  
-### Config and setup server:
-- Cấu hình server để mở các port: 7000, 8000, 8001, 4443, 10000-10050 để sử dụng. Phần này các bạn có thể google để setup.
-- Cài đặt docker. Đây là [hướng dẫn cài đặt](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04) trên Ubuntu-16.06
+Tiếp đến là cấu hình mở port và cài đặt docker.
+* Cấu hình server để mở các port: 7000, 8000, 8001, 4443, 10000-10050 để sử dụng. Gồm 2 bước: 
+   * Mở port với google cloud
+   * Mở port trên Ubuntu
+* Cài đặt docker. Đây là [hướng dẫn cài đặt](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04) trên Ubuntu-16.06
 
 ### Build and run ngrok server:
 
@@ -105,7 +107,8 @@ tunnels:
     proto:
       tcp: 6006    
 ```
-Các bạn setup các thông số từ dòng tunnels trở xuống. 
+Các bạn setup các thông số từ dòng tunnels trở xuống. Nếu không muốn thêm các cổng khác thì bạn giữ nguyên cell này.
+ 
 Ở đây là mình setup 2 tunnel:
 - *ssh-app:* dùng để map cổng 10004 trên ngrok server và cổng 22 trên máy Colab
 - *tensorboard-app:* map cổng 10006 trên ngrok server và cổng 6006 trên máy Colab
@@ -137,7 +140,7 @@ Trong quá trình run Colab notebook, nếu không có thao tác gì với noteb
  
 ![](images/connect_auto.png)
 
-Sau 60s đoạn mã này sẽ tự động ấn nút connect để tránh bị ngắt kết nối của session
+Sau 60s đoạn mã này sẽ tự động ấn nút *Connect* để tránh bị ngắt kết nối của session
 
 **Cell 3:**
 ```
@@ -187,7 +190,7 @@ Trước khi training cần phải setup code và data.
 **Bước 2:** Upload data từ local lên. Sử dụng lệnh scp trỏ đến cổng 10004, để upload file *data_mri.zip* lên thư mục 
 */root/data* trên Colab
 
-`scp -P 10004 data_mri.zip  root@35.186.148.223:/root/data`
+`scp -P 10004 data_mri.zip  root@35.186.148.224:/root/data`
 
 ![](images/scp.png)
 
@@ -198,12 +201,36 @@ Trong hình bên dưới là mình đang training ở panel bên trái và run T
   
 ![](images/training.png)
 
-Ở local browser ta có thể theo dõi Tensorboard tại địa chỉ `http://35.186.148.224:10006`. 
+Ở local browser ta có thể theo dõi Tensorboard tại địa chỉ `http://35.186.148.224:10006`
 
-Địa chỉ này bao gồm địa chỉ của server cài đặt ngrok-server (35.186.148.224) và port 10006 là port đã setup cho 
+Link này bao gồm địa chỉ của server cài đặt ngrok-server (35.186.148.224) và port 10006 là port đã setup cho 
 Tensorboard-app
 
 ![](images/tensorboard.png)
 
 
+ **Bước 4:** Đồng bộ các checkpoint và log về local
  
+Mình đã setup sẵn một file [bash-script](https://github.com/tanle2694/ssh_colab/blob/master/rsynfile.sh) cho phép đồng 
+bộ một thư mục trên Colab server xuống local:
+
+Các bạn chỉ cần setup các thông số:
+```
+REMOTE_IP="35.186.148.224"
+REMOTE_PORT="10004"
+REMOTE_DIR="/root/data/save_dir"
+LOCAL_DIR="/home/tanlm/Downloads/lgg-mri-segmentation/remote_save_dir"
+TIME_SLEEP=10
+``` 
+- REMOTE_IP: IP của ngrok-server
+- REMOTE_PORT: port dùng để ssh
+- REMOTE_DIR: Thư mục cần đồng bộ trên Colab server 
+- LOCAL_DIR: Thư mục sẽ được đồng bộ xuống ở local
+- TIME_SLEEP: Thời gian dừng giữa các lần đồng bộ file tính theo second
+
+Sau khi setup các tham số xong thì chỉ cần chạy. Các checkpoint sẽ được đồng bộ xuống local mỗi 10 second:
+
+```
+chmod +x rsynfile.sh
+./rsynfile.sh
+```
